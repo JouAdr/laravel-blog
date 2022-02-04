@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\IndexController;
 use TCG\Voyager\Facades\Voyager;
 use Illuminate\Support\Facades\Route;
 
@@ -26,3 +27,5 @@ Route::get('/test', function () {
 Route::group(['prefix' => 'admin'], function () {
     Voyager::routes();
 });
+
+Route::get('/', [IndexController::class, 'index']);
