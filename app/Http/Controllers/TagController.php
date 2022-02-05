@@ -2,12 +2,12 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\Category;
-use App\Models\Post;
 use App\Models\Tag;
+use App\Models\Post;
+use App\Models\Category;
 use Illuminate\Http\Request;
 
-class IndexController extends Controller
+class TagController extends Controller
 {
     /**
      * Handle the incoming request.
@@ -15,38 +15,38 @@ class IndexController extends Controller
      * @param  \Illuminate\Http\Request  $request
      * @return \Illuminate\Http\Response
      */
-    public function __invoke(Request $request)
+
+
+    public function __invoke($slug)
     {
-        //obtient les messages qui sont publiés, triés par ordre décroissant de "id". 
-        $posts = Post::query()->where('is_published', true)
-            ->orderBy('id', 'desc')
-            ->get();
+        //obtient la tag par rapport au slug
+        $tag = Tag::query()
+            ->where('slug', $slug)
+            ->firstOrFail();
 
-        //obtenir les articles vedettes
-        $featured_posts = Post::query()
+        //obtient les articles publié en fonction du tag
+        $posts = $tag->posts()
             ->where('is_published', true)
-            ->where('is_featured', true)
             ->orderBy('id', 'desc')
-            ->take(5)
             ->get();
 
-        //obtient toutes les catégories
+        //obtient tous les articles
         $categories = Category::all();
 
         //obtient tous les tags
         $tags = Tag::all();
 
-        //obtient les 5 derniers articles
+        //obtient les 5 articles récents
         $recent_posts = Post::query()
             ->where('is_published', true)
             ->orderBy('created_at', 'desc')
             ->take(5)
             ->get();
 
-        //assigner les variables à la vue correspondante
-        return view('home', [
+        //assigner les variables à la vue
+        return view('tag', [
+            'tag' => $tag,
             'posts' => $posts,
-            'featured_posts' => $featured_posts,
             'categories' => $categories,
             'tags' => $tags,
             'recent_posts' => $recent_posts

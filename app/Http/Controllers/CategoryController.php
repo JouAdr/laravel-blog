@@ -7,7 +7,7 @@ use App\Models\Post;
 use App\Models\Tag;
 use Illuminate\Http\Request;
 
-class IndexController extends Controller
+class CategoryController extends Controller
 {
     /**
      * Handle the incoming request.
@@ -15,19 +15,18 @@ class IndexController extends Controller
      * @param  \Illuminate\Http\Request  $request
      * @return \Illuminate\Http\Response
      */
-    public function __invoke(Request $request)
-    {
-        //obtient les messages qui sont publiés, triés par ordre décroissant de "id". 
-        $posts = Post::query()->where('is_published', true)
-            ->orderBy('id', 'desc')
-            ->get();
 
-        //obtenir les articles vedettes
-        $featured_posts = Post::query()
+    public function __invoke($slug)
+    {
+        //obtient la catégorie demandée
+        $category = Category::query()
+            ->where('slug', $slug)
+            ->firstOrFail();
+
+        //obtenir les messages de cette catégorie
+        $posts = $category->posts()
             ->where('is_published', true)
-            ->where('is_featured', true)
             ->orderBy('id', 'desc')
-            ->take(5)
             ->get();
 
         //obtient toutes les catégories
@@ -36,7 +35,7 @@ class IndexController extends Controller
         //obtient tous les tags
         $tags = Tag::all();
 
-        //obtient les 5 derniers articles
+        //obtient les 5 derniers messages
         $recent_posts = Post::query()
             ->where('is_published', true)
             ->orderBy('created_at', 'desc')
@@ -44,9 +43,9 @@ class IndexController extends Controller
             ->get();
 
         //assigner les variables à la vue correspondante
-        return view('home', [
+        return view('category', [
+            'category' => $category,
             'posts' => $posts,
-            'featured_posts' => $featured_posts,
             'categories' => $categories,
             'tags' => $tags,
             'recent_posts' => $recent_posts
